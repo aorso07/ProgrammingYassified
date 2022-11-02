@@ -1,0 +1,255 @@
+DROP TABLE IF EXISTS patient CASCADE;
+DROP TABLE IF EXISTS provider CASCADE;
+DROP TABLE IF EXISTS medication CASCADE;
+DROP TABLE IF EXISTS diagnosis CASCADE;
+DROP TABLE IF EXISTS room CASCADE;
+DROP TABLE IF EXISTS visits CASCADE;
+DROP TABLE IF EXISTS takes CASCADE;
+DROP TABLE IF EXISTS prescribes CASCADE;
+DROP TABLE IF EXISTS carry CASCADE;
+DROP TABLE IF EXISTS assigned CASCADE;
+
+CREATE TABLE patient
+(Pid varchar PRIMARY KEY,
+ Pdob date,
+ Pfname varchar (50),
+ Plname varchar (50),
+ Paddress varchar (75),
+ Pcity varchar (50),
+ Pstate varchar (2),
+ Pzip varchar (10),
+ Pgender varchar(2)
+);
+
+INSERT INTO patient (Pid,Pdob,Pfname,Plname,Paddress,
+					Pcity, Pstate, Pzip,Pgender)
+VALUES
+('P1', '04-18-1997', 'John', 'Smith', '123 Apple Lane','Chicago','IL','60660','M'),
+('P2', '08-08-2001', 'Natalie', 'Stegman', '6720 N Sheridan Rd','Chicago','IL','60626', 'F'),
+('P3', '09-09-1965', 'Susie', 'Silly', '567 Orange St','Chicago','IL','60645', 'NB'),
+('P4', '01-04-1996', 'Lukey', 'Pukey', '890 Banana Ave','Chicago','IL','60662','M'),
+('P5', '11-27-1950', 'Scooter','Stegasaurus', '167 Fig Lane','Chicago','IL','60612','M'),
+('P6', '05-18-1997', 'Bob', 'Smith', '123 Orange Lane','Chicago','IL','60660','M'),
+('P7', '08-08-2002', 'Natalie', 'Maroon', '6720 N Ice Cream Rd','Chicago','IL','60606', 'F'),
+('P8', '09-21-1975', 'Susan', 'Laughy', '567 Cranberry Rd','Chicago','IL','60657', 'NB'),
+('P9', '01-21-1986', 'Dukey', 'Bukey', '890 Nintendo Ave','Chicago','IL','60661','M'),
+('P10', '11-27-1950', 'Rex','Stegasaurus', '28 Barbary Lane','Chicago','IL','60621','M');
+
+CREATE TABLE provider
+(PRid varchar PRIMARY KEY,
+ PRfname varchar(50),
+ PRlname varchar(50),
+ PRtype varchar(50),
+ PRspecialty varchar(50)
+);
+
+INSERT INTO provider (PRid,PRfname,PRlname,
+					 PRtype, PRspecialty)
+VALUES
+('PR1','Bonnie','Bones','MD','Orthopedics'),
+('PR2','Frankie','Flu','Nurse Practicioner','Immunology'),
+('PR3','Manny','Medicine','Physician Assistant','Family Medicine'),
+('PR4','Odin','Olsen','DO','Oncology'),
+('PR5','Patrick','Putty','Nurse','Psychiatry');
+
+
+CREATE TABLE medication
+(Mid varchar PRIMARY KEY,
+ MBname varchar(50),
+ MGname varchar(50)
+);
+
+INSERT INTO medication (Mid, MBname, MGname)
+VALUES
+('M1', 'Lexapro', 'Escitalopram'),
+('M2','Amoxil','Amoxicillin'),
+('M3','Ibuprofen','Motrin'),
+('M4','Neurontin','Gabapentin'),
+('M5','Desyrel','Trazodone');
+
+CREATE TABLE diagnosis
+(Did varchar PRIMARY KEY,
+ Dname varchar (50)
+);
+
+INSERT INTO diagnosis (Did, Dname)
+VALUES
+('D1', 'Flu'),
+('D2', 'Generalized Anxiety'),
+('D3', 'Hodgkin Lymphoma'),
+('D4', 'Type 1 Diabetes'),
+('D5', 'Heart Attack'),
+('D6','Type 2 Diabetes');
+
+CREATE TABLE room
+(Rid varchar PRIMARY KEY,
+ Rnumber varchar (5)
+);
+
+INSERT INTO room (Rid, Rnumber)
+VALUES
+('R1','100'),
+('R2','101'),
+('R3','102'),
+('R4','103'),
+('R5','104');
+
+CREATE TABLE visits
+(Vdate date,
+ Vtype varchar(50),
+ Pid varchar NOT NULL,
+ PRid varchar NOT NULL,
+ systolic numeric,
+ diastolic numeric,
+ height numeric,
+ weight numeric,
+PRIMARY KEY (Pid,PRid,Vdate),
+ FOREIGN KEY (Pid)
+         REFERENCES patient(Pid),
+ FOREIGN KEY (PRid)
+		 REFERENCES provider(PRid)
+);
+
+INSERT INTO visits (Pid, PRid, Vdate,
+				   Vtype, systolic, diastolic, height, weight)
+VALUES
+('P4','PR1','08-08-2022','PT',120,80,150,50),
+('P1','PR5','06-21-2019','Psychiatry Inpatient',112,72,143,46),
+('P3','PR2','10-10-2020','BMT',110,65,120,40),
+('P2','PR4','12-29-2019','Radiation',125,82,134,45),
+('P5','PR3','04-06-2021','Yearly Check-up',115,72,125,55),
+('P6','PR1','08-08-2021','Yearly Check-up',130,85,150,100),
+('P7','PR1','06-21-2019','Yearly Check-up',134,90,143,86),
+('P8','PR2','10-10-2022','Yearly Check-up',120,80,120,127),
+('P9','PR4','12-29-2017','Yearly Check-up',140,87,134,114),
+('P10','PR3','04-06-2022','Yearly Check-up',115,72,125,81),
+('P1','PR1','10-10-2022', 'Yearly Check-up', 120, 85, 130, 125),
+('P3', 'PR1','10-10-2022', 'Yearly Check-up',122, 80, 130,125),
+('P9', 'PR4', '10-10-2022', 'Yearly Check-up',131,91,130, 125);
+
+CREATE TABLE takes
+(Pid varchar NOT NULL,
+ Mid varchar NOT NULL,
+ Tdate date,
+ directions varchar (50),
+ dosage numeric,
+ PRIMARY KEY (Pid, Mid, Tdate),
+ FOREIGN KEY (Pid)
+ 		 REFERENCES patient(Pid),
+ FOREIGN KEY (Mid)
+ 		 REFERENCES medication(Mid)
+);
+
+INSERT INTO takes (Pid, Mid, Tdate, directions,
+				  dosage)
+VALUES
+('P3','M1','04-10-2022','morning',5),
+('P2','M2','03-09-2018','during lunch',25),
+('P2','M4','05-16-2019','before bed',100),
+('P4','M1','07-18-2020','morning',15),
+('P1','M3','10-12-2021','as needed',220);
+
+CREATE TABLE prescribes
+(Pdate date,
+ PRid varchar NOT NULL,
+ Mid varchar NOT NULL,
+ PRIMARY KEY (PRid, Mid, Pdate),
+ FOREIGN KEY (PRid)
+		 REFERENCES provider(PRid),
+ FOREIGN KEY (Mid)
+  		REFERENCES medication(Mid)
+);
+
+INSERT INTO prescribes (PRid, Mid, Pdate)
+VALUES
+('PR1','M1','04-10-2022'),
+('PR2','M2','06-09-2020'),
+('PR3','M3','08-25-2021'),
+('PR4','M4','09-30-2020'),
+('PR5','M5','10-05-2022'),
+('PR2', 'M1', '10-10-2022'),
+('PR1', 'M2', '10-10-2022'),
+('PR1', 'M4', '10-10-2022'),
+('PR1', 'M3', '10-10-2022'),
+('PR3', 'M5', '10-10-2022');
+
+CREATE TABLE carry
+(Cdate date,
+ Did varchar NOT NULL,
+ Pid varchar NOT NULL,
+ severity varchar (10),
+ PRIMARY KEY (Did,Pid,Cdate),
+ FOREIGN KEY (Did)
+ 		 REFERENCES diagnosis(Did),
+ FOREIGN KEY (Pid)
+ 		 REFERENCES patient(Pid)
+);
+
+INSERT INTO carry (Did, Pid, Cdate,severity)
+VALUES
+('D1','P2','10-15-2020','medium'),
+('D2','P5','11-12-2022','low'),
+('D2','P2','01-10-2021','low'),
+('D4','P4','03-17-2022','high'),
+('D3','P1','06-21-2019','medium'),
+('D6','P6','10-15-2020','medium'),
+('D4','P7','11-12-2022','medium'),
+('D6','P8','01-10-2021','high'),
+('D6','P9','03-17-2022','medium'),
+('D4','P10','06-21-2019','low');
+
+CREATE TABLE assigned
+(Adate date,
+ Rid varchar NOT NULL,
+ Pid varchar NOT NULL,
+ PRIMARY KEY (Rid,Pid,Adate),
+ FOREIGN KEY (Rid)
+		 REFERENCES room(Rid),
+ FOREIGN KEY (Pid)
+ 		 REFERENCES patient(Pid)
+);
+
+INSERT INTO assigned (Rid, Pid, Adate)
+VALUES
+('R1','P3','02-16-2019'),
+('R1','P2','03-03-2020'),
+('R2','P5','09-19-2021'),
+('R3','P1','06-12-2022'),
+('R5','P4','08-22-2021');
+
+
+SELECT PR.prid, PR.prtype, PR.prfname, PR.prlname, COUNT(DISTINCT Rx.mid) - COUNT(DISTINCT v.pid) as surplusRx
+FROM provider PR,  visits V, prescribes RX
+WHERE PR.prid = V.prid AND PR.prid = RX.prid AND
+		(RX.pdate = '10-10-2022' AND
+		 V.vdate = '10-10-2022')
+GROUP BY PR.prid, PR.prtype, PR.prfname, PR.prlname
+ORDER BY surplusRx DESC;
+
+SELECT C.Did, D.Dname, ROUND(AVG(V.weight),2) AS avg_weight,ROUND(AVG(V.systolic),2) 
+	AS avg_systolic, ROUND(AVG(V.diastolic),2) AS avg_diastolic
+FROM visits V, carry C, diagnosis D
+WHERE V.Pid = C.Pid AND C.Did = D.Did AND C.Did IN ('D4','D6')
+GROUP BY C.Did, D.Dname;
+
+
+CREATE OR REPLACE VIEW t AS
+SELECT V.PRid,COUNT(*) AS numPatients
+FROM visits V, carry C
+WHERE V.Pid = C.pid AND C.did IN ('D4','D6')
+GROUP BY V.PRid;
+
+SELECT t.PRid,P.prfname,P.prlname, t.numpatients
+FROM t, provider P
+WHERE t.PRid = P.PRid AND t.numPatients = (
+	SELECT MAX(numPatients)
+	FROM t);
+
+SELECT P.pid, P.pfname, P.plname, max(V.vdate) as mostRecentVdate, V.vtype, PR.prlname
+FROM patient P, visits V, provider PR
+WHERE P.pid = V.pid AND PR.prid = V.prid
+GROUP BY P.pid, P.pfname, P.plname, V.vtype, PR.prlname
+ORDER BY mostRecentVdate ASC;
+
+
+
